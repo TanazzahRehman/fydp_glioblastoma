@@ -1,6 +1,5 @@
 # ADVANCING RADIONGENOMICS: AI ENABLED GLIOBLASTOMA SUBTYPE PREDICTION
 
-```markdown
 # Glioblastoma Research Project
 
 This repository contains files and resources related to our research project on glioblastoma.
