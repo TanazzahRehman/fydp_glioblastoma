@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="icon" type="image/png" href="../static/logo.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <style>
+    .navbar{
+      background-color: #1a202c;
+    }
+
+    .nav-link {
+      transition: transform 0.3s ease;
+      color: #a0aec0; 
+    }
+  
+    .nav-link.active {
+      color: #fff !important; /* White color for the active link */
+    }
+  
+    .nav-link:hover {
+      color: #fff; /* White color on hover */
+      transform: scale(1.1);
+    }
+    
+    /* Minimal custom styles */
+    body {
+      background-color: #1a202c;
+      color: #fff;
+    }
+    
+    .hero-section {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .hero-section video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+      transition: opacity 0.5s ease;
+    }    
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, .7);
+    }
+
+    .hero-section:hover video {
+      opacity: 0.6;
+    }
+
+    .hero-content {
+      width: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .hero-content h1 {
+      font-size: 5rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
+    }
+
+    .hero-content h1:hover {
+      transform: scale(1.05);
+    }
+
+    .hero-content p {
+      width:50%;
+      margin: auto;
+      font-size: 1.25rem;
+      line-height: 1.6;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .upload-button {
+      margin-top: 1rem;
+      font-size: 18px;
+      letter-spacing: 1px;
+      transition: background-color 0.3s ease;
+    }
+
+    .upload-button:hover {
+      background-color: #3182ce;
+    }
+
+    .show-visualize-button{
+      display: none;
+    }
+
+     .upload-section {
+       margin-top: 9rem !important;
+       margin-bottom: 9rem !important;
+    }
+  
+    .upload-section label {
+      border: 2px dashed #cbd5e0;
+      transition: border-color 0.3s ease;
+    }
+
+    .upload-section label:hover {
+      border-color: #718096;
+    }
+
+    .upload-section svg {
+      width: 2rem;
+      height: 2rem;
+      margin-right: 1rem;
+    }
+    
+    .upload-section label:hover svg {
+      transform: scale(1.1);
+    }
+
+    .color-bands {
+      background: linear-gradient(to right, green, yellow, red);
+      height: 20px;
+      border-radius: 0.25rem;
+    }
+    .rendered-section .show-visualize-button {
+      margin-top: 1rem;
+    }
+
+    .loadingSpinner {
+      display: none; 
+      top: 0; 
+      left: 0; 
+      background-color: rgba(0, 0, 0, 0.5); 
+      z-index: 1050;
+    }
+
+  </style>
+</head>
+
+<body>
+  <nav class="navbar sticky-top navbar-expand-lg">
+    <div class="container-fluid justify-content-center">
+      <ul class="navbar-nav">
+        <li class="nav-item mx-4">
+          <a class="nav-link active" aria-current="page" href="#" onclick="setActive(this)">Home</a>
+        </li>
+        <li class="nav-item mx-4">
+          <a class="nav-link" href="{{ url_for('faqs') }}" >FAQs</a>
+        </li>
+        <li class="nav-item mx-4">
+          <a class="nav-link" href="{{ url_for('visualize') }}">Visualize</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  
+  <!-- Hero section with video background -->
+  <section class="hero-section">
+    <!-- Video background -->
+    <div className="overlay"></div>
+    <video autoplay muted loop id="bg-video">
+      <source src="../static/glioblast.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <!-- Content -->
+    <div class="hero-content">
+      <h1>Glioblastoma Detection</h1>
+      <p>
+        Glioblastoma is an aggressive brain tumor, known for its rapid
+        growth and resistance to treatment, presenting significant
+        challenges in patient care and treatment innovation.
+      </p>
+      <a href="javascript:void(0);" onclick="scrollToUploadSection();" ><button class="btn btn-primary upload-button" >Upload</button></a>
+      </a>
+    </div>
+  </section>
+
+<!-- Upload file section -->
+<section class="upload container my-5" id="upload-section">
+  <div class="row">
+    <!-- Upload file section -->
+    <div class="col-md-6 d-flex justify-content-center align-items-center">
+      <div class="card text-light upload-section bg-transparent border-0" style="height: 300px;">
+        <div class="card-body text-center d-flex flex-column justify-content-between">
+          <h1 class="card-title">Upload new NIfTI File</h1>
+          <form id="upload-form" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="file" class="form-label">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M13 3a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h7a2 2 0 002-2V5a2 2 0 00-2-2zM6 1a1 1 0 00-1 1v12a1 1 0 001 1h7a1 1 0 001-1V2a1 1 0 00-1-1H6z" clip-rule="evenodd"/>
+                  <path fill-rule="evenodd" d="M9 10a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1zM8 5a1 1 0 00-1 1v1a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <span>Choose a file or drag it here</span>
+              </label>
+              <input type="file" name="file" id="file" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+          </form>
+          <div class="selected-file mt-2" id="selected-file">No file selected</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Rendered model section -->
+    <div class="col-md-6 d-flex justify-content-center align-items-center">
+      <div class="card text-light rendered-section bg-transparent border-0" style="height: 300px;">
+        <div class="card-body text-center d-flex flex-column justify-content-between">
+          <div>
+            <h1 class="card-title">----- Accuracy -----</h1>
+            <div class="color-bands" id="color-bands"></div>
+            <div class="prediction-percentage mt-2" id="prediction-percentage"></div>
+            <div class="d-flex justify-content-center mt-3"> <!-- Adjusted margin here -->
+              <button class="show-visualize-button btn btn-primary">Visualize</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+    
+<div class=" loadingSpinner justify-content-center align-items-center position-fixed w-100 h-100">
+  <div  class="spinner-border text-light" role="status">
+    <span class="sr-only"></span>
+  </div>
+</div>
+  
+<script>
+    function setActive(link) {
+      var links = document.querySelectorAll('.nav-link');
+      links.forEach(function(element) {
+        element.classList.remove('active');
+      });
+      link.classList.add('active');
+    }
+
+    function scrollToUploadSection() {
+      document.getElementById('upload-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    document.getElementById('file').addEventListener('change', function(event) {
+      const fileName = event.target.files[0]?.name || 'No file selected';
+      document.getElementById('selected-file').textContent = fileName;
+    });
+
+    document.querySelector('.show-visualize-button').addEventListener('click', function() {
+      window.location.href = "{{ url_for('visualize') }}";
+  });
+
+  document.getElementById('upload-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+  
+    // Show the spinner
+    document.querySelector('.loadingSpinner').style.display = 'flex';
+  
+    const formData = new FormData();
+    const fileInput = document.getElementById('file');
+    const file = fileInput.files[0];
+    formData.append('file', file);
+  
+    try {
+      const response = await fetch('/predict', {
+        method: 'POST',
+        body: formData
+      });
+  
+      const result = await response.json();
+      const renderedSection = document.getElementById('rendered-section');
+      const colorBandsDiv = document.getElementById('color-bands');
+      const predictionPercentageDiv = document.getElementById('prediction-percentage');
+  
+      if (response.ok) {
+        const prediction = result.prediction[0]; // Assuming the result structure is consistent
+        const percentage = Math.round(prediction * 100);
+  
+        // Update color bands
+        colorBandsDiv.style.width = `${percentage}%`;
+  
+        // Update prediction percentage text
+        predictionPercentageDiv.textContent = `${percentage}%`;
+  
+        document.querySelector('.show-visualize-button').style.display = 'block';
+      } else {
+        renderedSection.innerHTML = '<h1>----- Accuracy -----</h1><pre>Error: ' + JSON.stringify(result, null, 2) + '</pre>';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      const renderedSection = document.getElementById('rendered-section');
+      renderedSection.innerHTML = '<h1>----- Accuracy -----</h1><pre>Error: ' + error.message + '</pre>';
+    } finally {
+      // Hide the spinner after 5 seconds
+      document.querySelector('.loadingSpinner').style.display = 'none';
+    }
+  });
+  
+  </script>
+</body>
+</html>

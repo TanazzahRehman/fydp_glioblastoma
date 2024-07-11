@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FAQs</title>
+    <link rel="icon" type="image/png" href="../static/logo.png" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        .navbar {
+            background-color: #1a202c;
+        }
+
+        .nav-link {
+            transition: transform 0.3s ease;
+            color: #a0aec0;
+        }
+
+        .nav-link.active {
+            color: #fff !important;
+        }
+
+        .nav-link:hover {
+            color: #fff; /* White color on hover */
+            transform: scale(1.1);
+        }
+
+        body {
+            background-color: #1a202c;
+            color: #fff;
+        }
+
+        .card-header {
+            background-color: #e5eaf1;
+            color: #fff;
+        }
+
+        .btn-link {
+            color: #1a202c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-link:hover {
+            color: #5f6c80;
+            text-decoration: none;
+        }
+
+        .card-body {
+            background-color: #e5eaf1;
+            color: #1a202c;
+        }
+
+        .card {
+            border: none;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .subheading {
+            font-size: 1.15rem;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar sticky-top navbar-expand-lg">
+        <div class="container-fluid justify-content-center">
+            <ul class="navbar-nav">
+                <li class="nav-item mx-4">
+                    <a class="nav-link" aria-current="page" href="{{ url_for('upload_file') }}">Home</a>
+                </li>
+                <li class="nav-item mx-4">
+                    <a class="nav-link active" href="#" onclick="setActive(this)">FAQs</a>
+                </li>
+                <li class="nav-item mx-4">
+                    <a class="nav-link" href="{{ url_for('visualize') }}">Visualize</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="mb-4">Frequently Asked Questions</h1>
+        <p class="mb-5 subheading">Got any questions? We're here to answer!</p>
+        <div id="faqContainer" class="mt-5 mb-5"></div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- FAQ Data -->
+    <script src="../static/faqsData.js"></script>
+
+    <!-- Script to dynamically generate FAQ content -->
+    <script>
+        const faqContainer = document.getElementById("faqContainer");
+
+        faqData.forEach((faq, index) => {
+            const faqItem = document.createElement("div");
+            faqItem.classList.add("card", "mb-3");
+            faqItem.innerHTML = `
+                <div class="card-header" id="heading${index}">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
+                            ${faq.question}
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapse${index}" class="collapse" aria-labelledby="heading${index}" data-parent="#faqContainer">
+                    <div class="card-body">
+                        ${faq.answer}
+                    </div>
+                </div>
+            `;
+            faqContainer.appendChild(faqItem);
+        });
+    </script>
+</body>
+</html>

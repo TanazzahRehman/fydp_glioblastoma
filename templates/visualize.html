@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Visualize</title>
+    <link rel="icon" type="image/png" href="../static/logo.png" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            background: #808080;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        li {
+            float: left;
+        }
+
+        li a,
+        .dropbtn {
+            /* menu header */
+            display: inline-block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        li a:hover,
+        .dropdown:hover .dropbtn {
+            background-color: #44ABDA;
+        }
+
+        li.dropdown {
+            display: inline-block;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .dropdown-content {
+            font-family: Arial, Helvetica, sans-serif;
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            /* menu items */
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .divider,
+        .linker,
+        .dropdown-item-checked,
+        .overlay {
+            border-top: 1px solid grey;
+        }
+
+    	canvas {
+			display: block;  /* prevents scrollbar */
+			border: 0;
+			width: 100vw;
+			height: 90vh;
+			max-width:100%;
+			max-height:100%;
+			overflow-x:hidden;
+			overflow-y:hidden;
+			top: 0;
+			left: 0;
+			margin: 0 auto;
+   		}
+
+   		<!--.dropdown-item-checked::before {
+		  position: absolute;
+		  left: .2rem;
+		  content: '✓';
+		  font-weight: 600;
+		}-->
+    </style>
+</head>
+
+<body>
+    <div id="menu-container">
+        <input id="file-input" type="file" name="name" style="display: none;" />
+        <ul>
+            <li class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn" id="FileMenu">File</a>
+                <div class="dropdown-content">
+                    <a class="viewBtn" id="Open">Open</a>
+                    <a class="viewBtn" id="SaveBitmap">Screen Shot</a>
+                    <a class="linker" href="https://github.com/rordenlab/MRIcroWeb">About</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn" id="ViewMenu">View</a>
+                <div class="dropdown-content">
+                    <a class="viewBtn" id="L">Left</a>
+                    <a class="viewBtn" id="R">Right</a>
+                    <a class="viewBtn" id="P">Posterior</a>
+                    <a class="viewBtn" id="A">Anterior</a>
+                    <a class="viewBtn" id="I">Inferior</a>
+                    <a class="viewBtn" id="S">Superior</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">Color</a>
+                <div class="dropdown-content">
+                    <a class="viewBtn" id="!Gray">Gray</a>
+                    <a class="viewBtn" id="!Plasma">Plasma</a>
+                    <a class="viewBtn" id="!Viridis">Viridis</a>
+                    <a class="viewBtn" id="!Inferno">Inferno</a>
+                    <!-- <a class="viewBtn dropdown-item-checked" id="^Lighting">Lighting</a>  -->
+                    <a class="divider" id="BackColor">Background Color</a>
+                    <a class="viewBtn" id="ChangeContrast">Adjust brightness and contrast</a>
+                    <a class="viewBtn" id="OpacityInc">Harder Edges</a>
+                    <a class="viewBtn" id="OpacityDec">Softer Edges</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">Shader</a>
+                <div class="dropdown-content">
+                    <a class="viewBtn" id="^Standard">Standard</a>
+                    <a class="viewBtn" id="^Lighting">Lighting</a>
+                    <a class="viewBtn" id="^MIP">Maximum Intensity</a>
+                    <a class="viewBtn" id="^Gradients">Gradients</a>
+                </div>
+            </li>
+            <!-- <li class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">Examples</a>
+                <div class="dropdown-content">
+                    <a class="viewBtn" id="_spm152.nii.gz">spm</a>
+                    <a class="viewBtn" id="_avg152T1_LR_nifti.nii.gz">avg</a>
+                    <a class="viewBtn" id="_Chris_MRA.nii.gz">MRA</a>
+                    <a class="viewBtn" id="_Chris_T1.nii.gz">T1</a>
+                    <a class="viewBtn" id="_Chris_T2.nii.gz">T2</a>
+                </div> 
+            </li>-->
+        </ul>
+    </div>
+    <div id="gl-container" ondrop="drop(event)" ondragover="allowDrop(event)">
+    	<canvas id="glcanvas"></canvas>
+    </div>
+</body>
+<script src="../static/nifti/nifti-reader.js"></script>
+<script src="../static/volume/gl-matrix-min.js"></script>
+<script src="../static/volume/webgl-util.js"></script>
+<script src="../static/volume/shader-srcs.js"></script>
+<script src="../static/volume/FileSaver.js"></script>
+ <script src="{{ url_for('static', filename='volume/volume-renderer.js') }}"></script>
+</html>
