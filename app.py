@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request, jsonify, send_file
 import os
+import torch
 from inference import inference, load_model, unzip_dicom, remove_black_images, convert_folder_to_png, croppng, \
     png_series_to_nifti, delete_png_files
 
 app = Flask(__name__)
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model_path = "best_metric_model.pth"  # Path to the trained model
-model = load_model(model_path)
+model = load_model(model_path, device)
+
+
 @app.route('/')
 def upload_file():
     return render_template('upload.html')
@@ -16,16 +19,18 @@ def upload_file():
 def visualize():
     return render_template('visualize.html')
 
+
 @app.route('/faqs.html')
 def faqs():
     return render_template('faqs.html')
+
 
 @app.route('/check_directory')
 def check_directory():
     try:
         dir_path = './processed_data'
         print(f"Checking directory: {dir_path}")
-        
+
         if os.path.exists(dir_path):
             files = os.listdir(dir_path)
             print(f"Found files: {files}")
@@ -37,6 +42,7 @@ def check_directory():
         print(f"Error occurred: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/processed_data/output.nii.gz')
 def serve_outputnifti():
     nifti_path = './processed_data/output.nii.gz'
@@ -46,6 +52,7 @@ def serve_outputnifti():
         print(f"Error serving NIfTI file: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/spmSmall.nii.gz')
 def serve_spmSmallnifti():
     nifti_path = 'spmSmall.nii.gz'
@@ -54,6 +61,7 @@ def serve_spmSmallnifti():
     except Exception as e:
         print(f"Error serving NIfTI file: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -93,7 +101,7 @@ def predict():
 
         # Delete PNG files after conversion to NIfTI
         delete_png_files(new_data_folder)
-        prediction = inference(model,nifti_output_path)
+        prediction = inference(model, nifti_output_path)
         # Clean up extracted data
         os.remove(zip_path)
 
